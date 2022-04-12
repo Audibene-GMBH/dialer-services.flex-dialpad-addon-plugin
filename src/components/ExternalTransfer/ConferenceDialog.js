@@ -1,48 +1,48 @@
-import * as React from 'react';
-import { connect } from 'react-redux';
-import { Actions, withTheme, Manager, withTaskContext } from '@twilio/flex-ui';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import TextField from '@material-ui/core/TextField';
-import ConferenceService from '../../helpers/ConferenceService';
+import * as React from "react";
+import { connect } from "react-redux";
+import { Actions, withTheme, Manager, withTaskContext } from "@twilio/flex-ui";
+import Button from "@material-ui/core/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import TextField from "@material-ui/core/TextField";
+import ConferenceService from "../../helpers/ConferenceService";
 
 class ConferenceDialog extends React.Component {
   state = {
-    conferenceTo: ''
-  }
+    conferenceTo: "",
+  };
 
   handleClose = () => {
     this.closeDialog();
-  }
+  };
 
   closeDialog = () => {
-    Actions.invokeAction('SetComponentState', {
-      name: 'ConferenceDialog',
-      state: { isOpen: false }
+    Actions.invokeAction("SetComponentState", {
+      name: "ConferenceDialog",
+      state: { isOpen: false },
     });
-  }
+  };
 
-  handleKeyPress = e => {
+  handleKeyPress = (e) => {
     const key = e.key;
 
-    if (key === 'Enter') {
+    if (key === "Enter") {
       this.addConferenceParticipant();
       this.closeDialog();
     }
-  }
+  };
 
-  handleChange = e => {
+  handleChange = (e) => {
     const value = e.target.value;
     this.setState({ conferenceTo: value });
-  }
+  };
 
   handleDialButton = () => {
     this.addConferenceParticipant();
     this.closeDialog();
-  }
+  };
 
   addConferenceParticipant = async () => {
     const to = this.state.conferenceTo;
@@ -51,45 +51,57 @@ class ConferenceDialog extends React.Component {
     const conference = task && (task.conference || {});
     const { conferenceSid } = conference;
 
-    const mainConferenceSid = task.attributes.conference ? 
-      task.attributes.conference.sid : conferenceSid;
+    const mainConferenceSid = task.attributes.conference
+      ? task.attributes.conference.sid
+      : conferenceSid;
 
     let from;
     if (this.props.phoneNumber) {
-      from = this.props.phoneNumber
+      from = this.props.phoneNumber;
     } else {
-      from = Manager.getInstance().serviceConfiguration.outbound_call_flows.default.caller_id;
+      from =
+        Manager.getInstance().serviceConfiguration.outbound_call_flows.default
+          .caller_id;
     }
 
     // Adding entered number to the conference
     console.log(`Adding ${to} to conference`);
     let participantCallSid;
     try {
-
-      participantCallSid = await ConferenceService.addParticipant(mainConferenceSid, from, to);
-      ConferenceService.addConnectingParticipant(mainConferenceSid, participantCallSid, 'unknown');
-
+      participantCallSid = await ConferenceService.addParticipant(
+        mainConferenceSid,
+        from,
+        to
+      );
+      ConferenceService.addConnectingParticipant(
+        mainConferenceSid,
+        participantCallSid,
+        "unknown"
+      );
     } catch (error) {
-      console.error('Error adding conference participant:', error);
+      console.error("Error adding conference participant:", error);
     }
-    this.setState({ conferenceTo: '' });
-  }
+    this.setState({ conferenceTo: "" });
+  };
 
   render() {
     return (
-      <Dialog
-        open={this.props.isOpen || false}
-        onClose={this.handleClose}
-      >
+      <Dialog open={this.props.isOpen || false} onClose={this.handleClose}>
         <DialogContent>
           <DialogContentText>
-            {Manager.getInstance().strings.DIALPADExternalTransferPhoneNumberPopupHeader}
+            {
+              Manager.getInstance().strings
+                .DIALPADExternalTransferPhoneNumberPopupHeader
+            }
           </DialogContentText>
           <TextField
             autoFocus
             margin="dense"
             id="conferenceNumber"
-            label={Manager.getInstance().strings.DIALPADExternalTransferPhoneNumberPopupTitle}
+            label={
+              Manager.getInstance().strings
+                .DIALPADExternalTransferPhoneNumberPopupTitle
+            }
             fullWidth
             value={this.state.conferenceTo}
             onKeyPress={this.handleKeyPress}
@@ -97,17 +109,17 @@ class ConferenceDialog extends React.Component {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={this.handleDialButton}
-            color="primary"
-          >
-            {Manager.getInstance().strings.DIALPADExternalTransferPhoneNumberPopupDial}
+          <Button onClick={this.handleDialButton} color="primary">
+            {
+              Manager.getInstance().strings
+                .DIALPADExternalTransferPhoneNumberPopupDial
+            }
           </Button>
-          <Button
-            onClick={this.closeDialog}
-            color="secondary"
-          >
-            {Manager.getInstance().strings.DIALPADExternalTransferPhoneNumberPopupCancel}
+          <Button onClick={this.closeDialog} color="secondary">
+            {
+              Manager.getInstance().strings
+                .DIALPADExternalTransferPhoneNumberPopupCancel
+            }
           </Button>
         </DialogActions>
       </Dialog>
@@ -115,14 +127,19 @@ class ConferenceDialog extends React.Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const componentViewStates = state.flex.view.componentViewStates;
-  const conferenceDialogState = componentViewStates && componentViewStates.ConferenceDialog;
+  const conferenceDialogState =
+    componentViewStates && componentViewStates.ConferenceDialog;
   const isOpen = conferenceDialogState && conferenceDialogState.isOpen;
+  const { predialer } = state["audibene-predialer"] || {};
+  console.log(`predialer.callerId: ${predialer.callerId}`);
   return {
     isOpen,
-    phoneNumber: state.flex.worker.attributes.phone
+    phoneNumber: predialer?.callerId,
   };
 };
 
-export default connect(mapStateToProps)(withTheme(withTaskContext(ConferenceDialog)));
+export default connect(mapStateToProps)(
+  withTheme(withTaskContext(ConferenceDialog))
+);

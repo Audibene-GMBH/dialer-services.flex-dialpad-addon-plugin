@@ -24,7 +24,7 @@ const addParticipantToConference = (client, conferenceSid, taskSid, to, fromName
               to: to,
               name: fromName,
               from: process.env.TWILIO_NUMBER,
-              targetWorker: to,
+              targetWorkerUri: to,
               autoAnswer: 'false',
               conferenceSid: taskSid,
               conference: {
