@@ -32,7 +32,7 @@ export const makeInternalCall = ({
                 direction: 'outbound',
                 name: full_name || friendly_name,
                 fromName: fromFullName || fromName,
-                targetWorker: contact_uri,
+                targetWorkerUri: contact_uri,
                 autoAnswer: 'true',
                 client_call: true
             },
