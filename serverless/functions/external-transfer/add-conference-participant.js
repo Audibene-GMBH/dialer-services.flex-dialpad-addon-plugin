@@ -11,15 +11,26 @@ exports.handler = TokenValidator(async (context, event, callback) => {
     } = event;
 
     console.log(`Adding ${to} to named conference ${taskSid}`);
-    
+
     const client = context.getTwilioClient();
+    let regionalFrom = from;
+
+    if (from === "---") {
+        const participants = await client
+            .conferences(taskSid)
+            .participants
+            .list();
+        const { callSid } = participants[0];
+        const call = await client.calls(callSid).fetch();
+        regionalFrom = call.from;
+    }
 
     const participantsResponse = await client
         .conferences(taskSid)
         .participants
         .create({
             to,
-            from,
+            from: regionalFrom,
             earlyMedia: true,
             endConferenceOnExit: false
         });
