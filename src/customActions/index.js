@@ -61,29 +61,20 @@ export default (manager) => {
   })
 
   Actions.addListener('beforeHoldParticipant', (payload, abortFunction) => {
-    const { participantType, targetSid: participantSid, task } = payload;
-
-    if (participantType !== 'unknown') {
-      return;
-    }
-
+    const { targetSid: participantSid, task } = payload;
     const { conferenceSid } = task.conference;
+
     abortFunction();
     console.log('Holding participant', participantSid);
     return ConferenceService.holdParticipant(conferenceSid, participantSid);
   });
 
   Actions.addListener('beforeUnholdParticipant', (payload, abortFunction) => {
-    const { participantType, targetSid: participantSid, task } = payload;
-
-    if (participantType !== 'unknown') {
-      return;
-    }
-
-    console.log('Holding participant', participantSid);
-
+    const { targetSid: participantSid, task } = payload;
     const { conferenceSid } = task.conference;
+
     abortFunction();
+    console.log('Holding participant', participantSid);
     return ConferenceService.unholdParticipant(conferenceSid, participantSid);
   });
 
@@ -118,7 +109,7 @@ export default (manager) => {
     // check if worker hanging up is last worker on the call
     if (conference.liveWorkerCount === 1) {
 
-      //if so, ensure no other participants are on hold as 
+      //if so, ensure no other participants are on hold as
       //no external parties will be able to remove them from being on hold.
       conference.participants.forEach(async (participant) => {
         const { participantType, workerSid, callSid } = participant;
@@ -131,7 +122,7 @@ export default (manager) => {
         }
       });
 
-      // make sure this operation blocks hanging up the call until 
+      // make sure this operation blocks hanging up the call until
       // all participants are taken off hold or max wait time is reached
       let attempts = 0;
       let updatedConference = getLatestConference(taskSid);
