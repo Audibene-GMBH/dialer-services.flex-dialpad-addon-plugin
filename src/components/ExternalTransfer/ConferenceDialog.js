@@ -132,11 +132,12 @@ const mapStateToProps = (state) => {
   const conferenceDialogState =
     componentViewStates && componentViewStates.ConferenceDialog;
   const isOpen = conferenceDialogState && conferenceDialogState.isOpen;
-  const { predialer } = state["audibene-predialer"] || {};
-  console.log(`predialer.callerId: ${predialer.callerId}`);
+  const { predialer } = state["audibene-predialer"] || { predialer: {} };
+  const { config } = predialer;
+  console.log(`predialer.callerId: ${config?.callerId}`);
   return {
     isOpen,
-    phoneNumber: predialer?.callerId,
+    phoneNumber: config?.callerId,
   };
 };
 
